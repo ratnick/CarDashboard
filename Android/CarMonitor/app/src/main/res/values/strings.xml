@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">RATNICK Car Monitor</string>
+    <string name="outdoor_temp">Outdoor temp:</string>
+    <string name="deg_c"> °C </string>
+    <string name="engine">Engine</string>
+    <string name="hh_mm_ss">hh:mm:ss</string>
+    <string name="ambient">Ambient</string>
+    <string name="tyres">Tyres</string>
+    <string name="timestamp">Data timestamp:</string>
+    <string name="raceOnOff">Race / Pause</string>
+    <string name="raceOn">ACTIVE</string>
+    <string name="raceOff">In power save mode</string>
+</resources>

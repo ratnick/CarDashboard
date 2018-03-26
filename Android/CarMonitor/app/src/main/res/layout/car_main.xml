@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.droid.ws.MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/tyresTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/tyres"
+                        android:textAppearance="@android:style/TextAppearance.Medium" />
+
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="start">
+
+                    <TextView
+                        android:id="@+id/LFtemperatureTextView"
+                        android:layout_width="200dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/deg_c"
+                        android:textAlignment="textEnd"
+                        android:textColor="@android:color/holo_red_dark"
+                        android:textSize="130sp" />
+
+                    <Space
+                        android:layout_width="45dp"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:id="@+id/RFtemperatureTextView"
+                        android:layout_width="200dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/deg_c"
+                        android:textAlignment="textEnd"
+                        android:textColor="@android:color/holo_red_dark"
+                        android:textSize="130sp" />
+
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="start">
+
+                    <TextView
+                        android:id="@+id/LRtemperatureTextView"
+                        android:layout_width="200dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/deg_c"
+                        android:textAlignment="textEnd"
+                        android:textColor="@android:color/holo_red_dark"
+                        android:textSize="130sp" />
+
+                    <Space
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:id="@+id/RRtemperatureTextView"
+                        android:layout_width="200dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/deg_c"
+                        android:textAlignment="textEnd"
+                        android:textColor="@android:color/holo_red_dark"
+                        android:textSize="130sp" />
+
+                </TableRow>
+
+            </TableLayout>
+
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1.3">
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/engineTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/engine"
+                        android:textAppearance="@android:style/TextAppearance.Medium" />
+
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </TableLayout>
+
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1.1">
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/ambientTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/ambient"
+                        android:textAppearance="@android:style/TextAppearance.Medium" />
+
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/timestampTextView"
+                        android:layout_width="179dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/timestamp"
+                        android:textStyle="bold"
+                        tools:layout_editor_absoluteX="28dp"
+                        tools:layout_editor_absoluteY="706dp" />
+
+                    <TextView
+                        android:id="@+id/sensorsDataReceivedTimeTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/hh_mm_ss"
+                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
+                        tools:layout_editor_absoluteX="836dp"
+                        tools:layout_editor_absoluteY="642dp" />
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/textView3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/outdoor_temp"
+                        android:textAppearance="@android:style/TextAppearance.Holo.Small" />
+
+                    <TextView
+                        android:id="@+id/ambientTemperatureTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/outdoor_temp"
+                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
+                        tools:layout_editor_absoluteX="993dp"
+                        tools:layout_editor_absoluteY="590dp" />
+
+                </TableRow>
+
+            </TableLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="end">
+
+                    <ToggleButton
+                        android:id="@+id/raceOnOffButton"
+                        android:layout_width="500dp"
+                        android:layout_height="100dp"
+                        android:text="@string/raceOnOff"
+                        android:textAppearance="@android:style/TextAppearance.Large"
+                        android:textOff="@string/raceOff"
+                        android:textOn="@string/raceOn" />
+                </TableRow>
+
+            </TableLayout>
+
+        </LinearLayout>
+    </LinearLayout>
+
+</android.support.constraint.ConstraintLayout>

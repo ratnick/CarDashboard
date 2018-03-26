@@ -1,0 +1,29 @@
+Android/CarMonitor/CarMonitor.iml
+Android/nnrCarMonitoring_Android.zip
+Android/CarMonitor/import-summary.txt
+Android/CarMonitor/gradlew.bat
+Android/CarMonitor/gradlew
+Android/CarMonitor/.gradle/
+Android/CarMonitor/.idea/
+Android/CarMonitor/app/app.iml
+Android/CarMonitor/app/build/
+Android/CarMonitor/build/
+Android/CarMonitor/gradle/
+Android/nnrMobileAppService_Runtime/nnrMobileAppServiceService/obj/
+Arduino/CarMonitor/__vm/
+Arduino/CarMonitor/Debug/
+Arduino/CarMonitor/Release/
+AzureBackend/.vs/nnrCarMonitoring/v15/
+AzureBackend/nnrCarMonitoringService/Web.Release.config
+AzureBackend/nnrCarMonitoringService/Web.Debug.config
+AzureBackend/nnrCarMonitoringService/bin/
+AzureBackend/nnrCarMonitoringService/obj/
+AzureBackend/nnrCarMonitoringService/Properties/PublishProfiles/nnrCarMonitoring - Web Deploy.pubxml
+AzureBackend/nnrCarMonitoringService/Properties/AssemblyInfo.cs
+AzureBackend/packages/
+3D print/WEMOS_D1_Mini_ENCLOSURE_with_BL-5C_NOKIA_battery___sensors_space/README.txt
+3D print/WEMOS_D1_Mini_ENCLOSURE_with_BL-5C_NOKIA_battery___sensors_space/LICENSE.txt
+3D print/WEMOS_D1_Mini_ENCLOSURE_with_BL-5C_NOKIA_battery___sensors_space/SOURCES.txt
+3D print/WEMOS_D1_Mini_ENCLOSURE_with_BL-5C_NOKIA_battery___sensors_space/attribution_card.html
+*.stl
+3D print/WEMOS_D1_Mini_ENCLOSURE_with_BL-5C_NOKIA_battery___sensors_space/images/
