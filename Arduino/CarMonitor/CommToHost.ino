@@ -12,7 +12,7 @@ bool connectUDP() {
 	return state;
 }
 
-void initUDP() {
+boolean initUDP() {
 	udpConnected = false;
 	// only proceed if wifi connection successful
 	if (WiFi.status() == WL_CONNECTED) {
@@ -22,18 +22,20 @@ void initUDP() {
 			delay(453);  // keep trying after a while
 		}
 		// at regular intervals, ask the server until it responds
-		do {
-			//WriteDataToUDP(buf++);
+//		do {
 			BuildAndSendUDPToHost_AskToJoin();
+			delay(800);
 			if ( ReadCmdFromUDP() > 0) { // we accept both CMD_OK_TO_JOIN_NETWORK, CMD_READ_SENSOR_DATA, and CMD_GOTO_DEEP_SLEEP
 										 // since all commands means that device is registered at host
 				Serial.println("* Connected to host.");
 				udpConnected = true;
-			} else {
-				delay(3000);
-			}
-		} while (!udpConnected);
+			} 
+//			else {
+//				delay(3000);
+//			}
+//		} while (!udpConnected);
 	}
+	return udpConnected;
 }
 
 void BuildAndSendUDPToHost_AskToJoin() {
@@ -78,6 +80,7 @@ int ReadCmdFromUDP() {   // return 0 if no UDP on port or if not to this device.
 		}
 		else {
 			commandID = 0; // this packet is not for me. Up to sender to deal with retransmission
+			Serial.printf("ReadCmdFromUDP: not for this device");
 		}
 	}
 	return commandID;

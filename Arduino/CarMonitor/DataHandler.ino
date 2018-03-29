@@ -26,7 +26,11 @@
 		cmd.metricUnit1 = root["metricUnit1"];
 		cmd.displayTitle2 = root["displayTitle2"];
 		cmd.metricUnit2 = root["metricUnit2"];
-		deep_sleep_period = root["secondsToSleep"];
+		if (root.containsKey("secondsToSleep")) {
+			deepSleepPeriod = root["secondsToSleep"];
+			Serial.print("\ndeepSleepPeriod=");
+			Serial.println(deepSleepPeriod);
+		}
 		return cmd.commandID;
 	}
 

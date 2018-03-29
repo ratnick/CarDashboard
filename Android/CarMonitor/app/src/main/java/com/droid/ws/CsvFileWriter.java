@@ -1,6 +1,10 @@
 package com.droid.ws;
 
+import android.app.Application;
+import android.content.Context;
+import android.net.Uri;
 import android.os.Environment;
+import android.media.MediaScannerConnection;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -24,31 +28,8 @@ public class CsvFileWriter {
     private static String folderName = "CarMonitor";
     private static FileWriter fileWriter = null;
 
-    public static void AppendValueToFile(MainActivity.Sensor s) {
-
-        String line;
-
-        line = s.lastSampleTime.toString();
-
-        // we only write the values of known, predefined sensors
-        if (s.sensorID < MAX_KNOWN_SENSORS) {
-            for (int i = 0; i < s.sensorID; i++) {
-                line = line + ",";
-            }
-            line = line + ", " + s.value1 + ", " + s.value2;
-            try {
-                printWriter.println(line + "\n");
-                printWriter.flush();
-                //fileWriter.append(line + "\n");
-            } catch (Exception e) {
-                System.out.println("Error in CsvFileWriter !!!");
-                e.printStackTrace();
-            }
-        }
-    }
-
     // function opens file and printwriter and leaves them open
-    public static void CreateCsvFile(String [] knownSensors, int MAX_KNOWN_SENSORS) {
+    public static void CreateCsvFile(String [] knownSensors, int MAX_KNOWN_SENSORS, Context appContext) {
         root = android.os.Environment.getExternalStorageDirectory();
         //tv.append("\nExternal file system root: "+root);
         // See http://stackoverflow.com/questions/3551821/android-write-to-sd-card-folder
@@ -59,7 +40,7 @@ public class CsvFileWriter {
         // NOTE: the file ends up here: Computer\Xperia Z5 Compact\Intern delt lagerplads\CarMonitor (i.e. on internal storage, not the SD card)
 
         try {
-            fStream = new FileOutputStream(file);
+            fStream = new FileOutputStream(file);  //TODO: If file already exists, just open it. Dont overwrite
             printWriter = new PrintWriter(fStream);
         } catch (FileNotFoundException e) {
             e.printStackTrace(); // Did you add a WRITE_EXTERNAL_STORAGE permission to the   manifest?
@@ -72,9 +53,42 @@ public class CsvFileWriter {
         }
         printWriter.println(line);
         printWriter.flush();
+
+        // make the file readable from a PC via USB
+        MediaScannerConnection.scanFile(appContext,
+                new String[] { file.toString() }, null,
+                new MediaScannerConnection.OnScanCompletedListener() {
+                    public void onScanCompleted(String path, Uri uri) {
+                        System.out.println("ExternalStorage Scanned " + path + ":");
+                    }
+                });
+
     }
 
-    public static void CloseCsvFile() {
+    public static void AppendValueToFile(MainActivity.Sensor s) {
+
+        String line;
+
+        line = s.lastSampleTime.toString();
+
+        // we only write the values of known, predefined sensors
+        if (s.sensorID < MAX_KNOWN_SENSORS) {
+            for (int i = 0; i < s.sensorID; i++) {
+                line = line + ",,";
+            }
+            line = line + ", " + s.value1 + ", " + s.value2;
+            try {
+                printWriter.println(line);
+                printWriter.flush();
+                //fileWriter.append(line + "\n");
+            } catch (Exception e) {
+                System.out.println("Error in CsvFileWriter !!!");
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void CloseCsvFile(Context appContext) {
         try {
             printWriter.close();
             fStream.close();
@@ -84,6 +98,16 @@ public class CsvFileWriter {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        // make the file readable from a PC via USB
+        MediaScannerConnection.scanFile(appContext,
+                new String[] { file.toString() }, null,
+                new MediaScannerConnection.OnScanCompletedListener() {
+                    public void onScanCompleted(String path, Uri uri) {
+                        System.out.println("ExternalStorage Scanned " + path + ":");
+                    }
+                });
+
     }
 
     /** Method to check whether external media available and writable. This is adapted from

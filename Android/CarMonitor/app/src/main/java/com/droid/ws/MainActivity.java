@@ -38,10 +38,9 @@ public class MainActivity extends Activity {
     static int MAX_KNOWN_SENSORS = 4;
     String[] knownSensors;  // These sensors will take a fixed place in the UI. If unlisted here, a sensor will be placed in random order.
     int unknownSensorCount = 0;
-    public static final int SENSOR_TIMEOUT = 5000; // ms
-    public static final int SENSOR_DEEP_SLEEP_TIMEOUT = 20; // sec
-
-    public static final int SAMPLE_INTERVAL_MS = 500;
+    public static final int SENSOR_TIMEOUT = 20000; // ms
+    //public static final int SENSOR_DEEP_SLEEP_TIMEOUT = 20; // sec
+    //public static final int SAMPLE_INTERVAL_MS = 500;
 
     TextView sensorsDataReceivedTimeTextView;
     TextView LFtemperatureTextView;
@@ -49,8 +48,11 @@ public class MainActivity extends Activity {
     TextView LRtemperatureTextView;
     TextView RRtemperatureTextView;
     TextView ambientTemperatureTextView;
+    TextView sensorSleepTime;
+    TextView sampleTime;
 
     ToggleButton raceOnOffButton;
+    Button exitButton;
 
     boolean appInBackground = false;
     boolean doneEditing = true;
@@ -90,10 +92,12 @@ public class MainActivity extends Activity {
         RRtemperatureTextView = (TextView) findViewById(R.id.RRtemperatureTextView);
         ambientTemperatureTextView = (TextView) findViewById(R.id.ambientTemperatureTextView);
         raceOnOffButton = (ToggleButton) findViewById(R.id.raceOnOffButton);
+        exitButton = (Button) findViewById(R.id.exitButton);
+        sensorSleepTime = (TextView) findViewById(R.id.sensorSleepTime);
+        sampleTime = (TextView) findViewById(R.id.sampleTime);
 
         if (CsvFileWriter.checkSDCard()) {
-            CsvFileWriter.CreateCsvFile(knownSensors, MAX_KNOWN_SENSORS);
-            CsvFileWriter.CloseCsvFile();
+            CsvFileWriter.CreateCsvFile(knownSensors, MAX_KNOWN_SENSORS, getApplicationContext());
         }
 
         // Write to the cloud
@@ -145,12 +149,13 @@ public class MainActivity extends Activity {
                                 int sensorID = GetSensorID(newDeviceID);
                                 if (!SensorIsInitialized(sensorID)) {
                                     sensor[sensorID] = new Sensor(jsonIncoming, ip, sensorID);
+                                }
                                     comm.CreateAndSendCmd_OkToJoin(newDeviceID , ip);
                                     TimedDelay(1200);
                                     if (sensorID >= MAX_KNOWN_SENSORS) {
                                         unknownSensorCount++;
                                     }
-                                }
+
                                 break;
                             case comm.CMD_SENSOR_DATA_REPLY :
                                 updateSensor(jsonIncoming);
@@ -167,10 +172,11 @@ public class MainActivity extends Activity {
             }
         }).start();
 
-        // poll for data from attached sensor. Reception handled in other thread
+        // poll for data from all attached sensors in same thread. Reception handled in other thread
         new Thread(new Runnable() {
             @Override
             public void run() {
+                int sampletime = 2000;
                 while (true) {
                         for (int i = 0; i < MAX_SENSORS; i++) {
                             if (SensorIsInitialized(i)) {
@@ -182,12 +188,15 @@ public class MainActivity extends Activity {
                                 }
                                 comm.CreateAndSendCmd_GetSensorReadings(sensor[i]);
                                 if (!raceOnOffButton.isChecked()) {
-                                    TimedDelay(SENSOR_TIMEOUT);
-                                    comm.CreateAndSendCmd_GotoDeepSleep(sensor[i], SENSOR_DEEP_SLEEP_TIMEOUT);
+                                    int sensorsleeptime = Integer.parseInt(sensorSleepTime.getText().toString());
+                                    //TimedDelay(2000); // wait for sensor to reply to the last data request
+                                    comm.CreateAndSendCmd_GotoDeepSleep(sensor[i], sensorsleeptime);
                                 }
                             }
                         }
-                        TimedDelay(SAMPLE_INTERVAL_MS);
+                        sampletime = Integer.parseInt(sampleTime.getText().toString());
+                        TimedDelay(sampletime);  //TODO: introduce a listener for changes instead of reading every time.
+                                                 //TODO: Use proposedSampleFreq sent from each device. That will require a loop or thread per device. Disavantage: Not runtime configurable.
                 }
             }
         }).start();
@@ -206,6 +215,14 @@ public class MainActivity extends Activity {
             }
         });
 
+        exitButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CsvFileWriter.CloseCsvFile(getApplicationContext());
+                finish();
+                System.exit(0);
+            }
+        });
     }
 
     void TimedDelay(int delay_ms) {
@@ -345,6 +362,7 @@ public class MainActivity extends Activity {
         public int upperLimit1 = 0;
         public int lowerLimit2 = 0;
         public int upperLimit2 = 0;
+        public int proposedSampleFreq = 0; //ms
 
         public Sensor(JSONObject json, InetAddress ip, int sensorID) {
 
@@ -358,6 +376,7 @@ public class MainActivity extends Activity {
                 if (json.has("upperLimit1")) {this.upperLimit1 = json.getInt("upperLimit1"); }
                 if (json.has("lowerLimit2")) {this.lowerLimit2 = json.getInt("lowerLimit2"); }
                 if (json.has("upperLimit2")) {this.upperLimit2 = json.getInt("upperLimit2"); }
+                if (json.has("proposedSampleFreq")) {this.proposedSampleFreq = json.getInt("proposedSampleFreq"); }
                 this.ip = ip;
                 this.sensorID = sensorID;
 

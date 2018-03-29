@@ -3,7 +3,7 @@ const char displayTitle1[] = "Ambient temp.";
 const char metricUnit1[] = "C";
 const char displayTitle2[] = "Tyre temp";
 const char metricUnit2[] = "C";
-const int  proposedSampleFreq = 1000; // ms
+const int  proposedSampleFreq = 5000; // ms   //NOTE: Not used at receiving end (android app). For future use.
 const int lowerLimit1 = 40;
 const int upperLimit1 = 80;
 const int lowerLimit2 = 15;
@@ -21,7 +21,7 @@ const int UDP_PORT = 1026;
 IPAddress hostIPaddress = (0xFFFFFFFF);
 time_t WATCHDOG_TIMEOUT = 20; // sec
 
-time_t deep_sleep_period = 30; // sec
+time_t deepSleepPeriod = 3; // sec   NOTE: This is the initial value. It is modified via CMD_GOTO_DEEP_SLEEP 
 
 // Pins on WeMos D1 Mini
 const int SPI_CS = 16; 

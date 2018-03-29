@@ -11,4 +11,8 @@
     <string name="raceOnOff">Race / Pause</string>
     <string name="raceOn">ACTIVE</string>
     <string name="raceOff">In power save mode</string>
+    <string name="sleepTimeInt">20</string>
+    <string name="sleepTimeText">Sensor sleep time (sec)</string>
+    <string name="sampleTimeInt">1000</string>
+    <string name="sampleTimeText">Sample time (ms)</string>
 </resources>

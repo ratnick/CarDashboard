@@ -185,33 +185,95 @@
 
         </LinearLayout>
 
-        <LinearLayout
+        <TableLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_height="match_parent">
 
-            <TableLayout
+            <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:weightSum="100">
 
-                <TableRow
-                    android:layout_width="match_parent"
+                <ToggleButton
+                    android:id="@+id/raceOnOffButton"
+                    android:layout_width="0dp"
+                    android:layout_height="100dp"
+                    android:layout_weight="35"
+                    android:text="@string/raceOnOff"
+                    android:textAppearance="@android:style/TextAppearance.Large"
+                    android:textOff="@string/raceOff"
+                    android:textOn="@string/raceOn" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="end"
+                android:weightSum="100">
+
+                <TextView
+                    android:id="@+id/sensorSleepTextView"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:gravity="end">
+                    android:layout_weight="20"
+                    android:text="@string/sleepTimeText" />
 
-                    <ToggleButton
-                        android:id="@+id/raceOnOffButton"
-                        android:layout_width="500dp"
-                        android:layout_height="100dp"
-                        android:text="@string/raceOnOff"
-                        android:textAppearance="@android:style/TextAppearance.Large"
-                        android:textOff="@string/raceOff"
-                        android:textOn="@string/raceOn" />
-                </TableRow>
+                <EditText
+                    android:id="@+id/sensorSleepTime"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="15"
+                    android:ems="10"
+                    android:hint="sec"
+                    android:inputType="number"
+                    android:text="@string/sleepTimeInt"
+                    android:textAppearance="@android:style/TextAppearance.Holo.Small" />
 
-            </TableLayout>
+            </TableRow>
 
-        </LinearLayout>
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:weightSum="100">
+
+                <Button
+                    android:id="@+id/exitButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="10"
+                    android:text="EXIT"
+                    android:textAlignment="viewStart" />
+
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="50" />
+
+                <TextView
+                    android:id="@+id/sampleTimeTextView"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="20"
+                    android:text="@string/sampleTimeText" />
+
+                <EditText
+                    android:id="@+id/sampleTime"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="15"
+                    android:ems="10"
+                    android:hint="ms"
+                    android:inputType="number"
+                    android:text="@string/sampleTimeInt"
+                    android:textAppearance="@android:style/TextAppearance.Holo.Small" />
+
+            </TableRow>
+
+        </TableLayout>
+
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

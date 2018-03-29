@@ -40,7 +40,7 @@ void setup() {
 	String wifipwd;
 
 	Serial.begin(115200);
-	Serial.println("TyreHeatMonitor START");
+	Serial.println("CarMonitor START");
 
 	initFlashLED();
 	LED_Flashes(5, 25);
@@ -50,7 +50,7 @@ void setup() {
 	initWifi();
 	PrintIPAddress();
 	setupHeatSensor();
-	initUDP();  // UDP setup and communication with host
+	//initUDP();  // UDP setup and communication with host
 }
 
 int i = 0;
@@ -68,6 +68,16 @@ void DoSampling() {
 	// We expect to reach this point at least every WATCHDOG_TIMEOUT ms. If we don't re-initiate connection to host.
 }
 
+void GoToDeepSleep() {
+	if (deepSleepPeriod > 0) {
+		Serial.println("Going to deep sleep");
+		watchdogTimestamp = now() + deepSleepPeriod;
+		ESP.deepSleep(deepSleepPeriod * 1000000);
+	}	else {
+		Serial.println("Deep sleep request NOT met. Value is zero");
+	}
+}
+
 void loop() {
 
 	StaticJsonBuffer<SENSORDATA_JSON_SIZE> jsonBuffer;
@@ -77,34 +87,40 @@ void loop() {
 		if (udpConnected && (now() < watchdogTimestamp) ) {
 			switch (ReadCmdFromUDP()) {  
 				case CMD_GOTO_DEEP_SLEEP:
-					Serial.println("going to deep sleep");
-					watchdogTimestamp = now() + deep_sleep_period;
-					ESP.deepSleep(deep_sleep_period * 1000000);
+					Serial.print("\nCMD_GOTO_DEEP_SLEEP");
+					GoToDeepSleep();
 					break;
 				case CMD_READ_SENSOR_DATA :
+					Serial.print("\nCMD_READ_SENSOR_DATA");
 					readHeatSensor();
 					serializeJson_ReadSensorData(sensorData, jsonObject);
 					jsonObject.prettyPrintTo(Serial);
 					sendJsonViaUDP(jsonObject);
 					// We expect to reach this point at least every WATCHDOG_TIMEOUT ms. If we don't re-initiate connection to host.
 					watchdogTimestamp = now() + WATCHDOG_TIMEOUT;
+					Serial.println(": EXECUTED");
 					break;
 			}
 			delay(200);
 		} else {
-			Serial.println("calling initUDP");
-			initUDP();
-			watchdogTimestamp = now() + WATCHDOG_TIMEOUT;
+			Serial.println("\ncalling initUDP");
+			if (initUDP()) {
+				watchdogTimestamp = now() + WATCHDOG_TIMEOUT;
+			} else {
+				Serial.print("\nCould not connect to host: ");
+				delay(2000);
+				GoToDeepSleep();
+			}
 		}
 	}
 	else {
 		initWifi();
 		delay(250);
+		if (WiFi.status() != WL_CONNECTED) {
+			Serial.print("\nCould not connect to wifi: ");
+			GoToDeepSleep();
+		}
 	}
-/*	if (i++ == 200) {
-		i = 0;
-		Serial.print(".");
-	}*/
 }
 
 // If Arduino should be used as access point instead of client
