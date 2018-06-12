@@ -15,4 +15,11 @@
     <string name="sleepTimeText">Sensor sleep time (sec)</string>
     <string name="sampleTimeInt">1000</string>
     <string name="sampleTimeText">Sample time (ms)</string>
+    <string name="voltageText">Voltage:</string>
+    <string name="wifiSSIDText">Wifi SSID:</string>
+    <string name="tempConvertAlphaText">Temp convert alpha</string>
+    <string name="tempConvertAlphaFloat">4.0</string>
+    <string name="tempConvertBetaText">Temp convert beta</string>
+    <string name="tempConvertBetaFloat">0.7</string>
+
 </resources>

@@ -7,40 +7,71 @@ import android.os.Environment;
 import android.media.MediaScannerConnection;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 
-import static com.droid.ws.MainActivity.MAX_KNOWN_SENSORS;
+import java.nio.channels.FileChannel;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
+import static com.droid.ws.Sensor.MAX_KNOWN_SENSORS;
 
 public class CsvFileWriter {
 
     private static File root;
     private static File finalFolder;
-    private static File file;
+    private static File csvFile;
     private static FileOutputStream fStream;
     private static PrintWriter printWriter;
 
-
-    private static String fileName = "rawdata.csv";
+    private static String baseFileName = "rawdata";
+    private static String fileNameExtension = ".csv";
     private static String folderName = "CarMonitor";
     private static FileWriter fileWriter = null;
+    private static String fileName;
 
     // function opens file and printwriter and leaves them open
-    public static void CreateCsvFile(String [] knownSensors, int MAX_KNOWN_SENSORS, Context appContext) {
+    public static void CreateCsvFile(Context appContext) {
+
+        Calendar calender;
+        SimpleDateFormat simpledateformat;
+        String Date;
+        String path;
+
         root = android.os.Environment.getExternalStorageDirectory();
         //tv.append("\nExternal file system root: "+root);
         // See http://stackoverflow.com/questions/3551821/android-write-to-sd-card-folder
 
-        finalFolder = new File (root.getAbsolutePath() + "/" + folderName);
+        path = root.getAbsolutePath() + "/" + folderName;
+        finalFolder = new File (path);
         finalFolder.mkdirs();
-        file = new File(finalFolder, fileName);
+
+        calender = Calendar.getInstance();
+        simpledateformat = new SimpleDateFormat("yyyy-MM-dd_HHmmss");
+        Date = simpledateformat.format(calender.getTime());
+        fileName = baseFileName + "_" + Date + fileNameExtension;
+
+        csvFile = new File(finalFolder, fileName);
         // NOTE: the file ends up here: Computer\Xperia Z5 Compact\Intern delt lagerplads\CarMonitor (i.e. on internal storage, not the SD card)
 
+        // make the file readable from a PC via USB
+        MediaScannerConnection.scanFile(
+                appContext,
+                new String[] { csvFile.toString() }, null,
+                new MediaScannerConnection.OnScanCompletedListener() {
+                    public void onScanCompleted(String path, Uri uri) {
+                        System.out.println("ExternalStorage Scanned " + path + ":");
+                    }
+            });
+
         try {
-            fStream = new FileOutputStream(file);  //TODO: If file already exists, just open it. Dont overwrite
+            fStream = new FileOutputStream(csvFile);  //TODO: If file already exists, just open it. Dont overwrite
             printWriter = new PrintWriter(fStream);
         } catch (FileNotFoundException e) {
             e.printStackTrace(); // Did you add a WRITE_EXTERNAL_STORAGE permission to the   manifest?
@@ -49,23 +80,13 @@ public class CsvFileWriter {
         // define and write header line
         String line = "UTC";
         for (int i=0;i<MAX_KNOWN_SENSORS;i++) {
-            line = line + ", " + knownSensors[i] + "-A, " + knownSensors[i] + "-B";
+            line = line + ", " + Sensor.knownSensors[i] + "-A, " + Sensor.knownSensors[i] + "-B";
         }
         printWriter.println(line);
         printWriter.flush();
-
-        // make the file readable from a PC via USB
-        MediaScannerConnection.scanFile(appContext,
-                new String[] { file.toString() }, null,
-                new MediaScannerConnection.OnScanCompletedListener() {
-                    public void onScanCompleted(String path, Uri uri) {
-                        System.out.println("ExternalStorage Scanned " + path + ":");
-                    }
-                });
-
     }
 
-    public static void AppendValueToFile(MainActivity.Sensor s) {
+    public static void AppendValueToFile(Sensor s) {
 
         String line;
 
@@ -89,8 +110,9 @@ public class CsvFileWriter {
     }
 
     public static void CloseCsvFile(Context appContext) {
+
+        printWriter.close();
         try {
-            printWriter.close();
             fStream.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -98,16 +120,6 @@ public class CsvFileWriter {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        // make the file readable from a PC via USB
-        MediaScannerConnection.scanFile(appContext,
-                new String[] { file.toString() }, null,
-                new MediaScannerConnection.OnScanCompletedListener() {
-                    public void onScanCompleted(String path, Uri uri) {
-                        System.out.println("ExternalStorage Scanned " + path + ":");
-                    }
-                });
-
     }
 
     /** Method to check whether external media available and writable. This is adapted from
@@ -136,70 +148,55 @@ public class CsvFileWriter {
         //        +mExternalStorageAvailable+" writable="+mExternalStorageWriteable);
     }
 
-    /** Method to write ascii text characters to file on SD card. Note that you must add a
-     WRITE_EXTERNAL_STORAGE permission to the manifest file or this method will throw
-     a FileNotFound Exception because you won't have write permission. */
-/*    public static void writeToSDFile(){
-
-        // Find the root of the external storage.
-        // See http://developer.android.com/guide/topics/data/data-  storage.html#filesExternal
-
-        File root = android.os.Environment.getExternalStorageDirectory();
-        //tv.append("\nExternal file system root: "+root);
-
-        // See http://stackoverflow.com/questions/3551821/android-write-to-sd-card-folder
-
-        File dir = new File (root.getAbsolutePath() + "/CarMonitor");
-        dir.mkdirs();
-        File file = new File(dir, "myData.txt");
-        // NOTE: the file actually ends up here: Computer\Xperia Z5 Compact\Intern delt lagerplads\CarMonitor (i.e. on internal storage, not the SD card)
-
-        try {
-            FileOutputStream f = new FileOutputStream(file);
-            PrintWriter pw = new PrintWriter(f);
-            pw.println("Hi , How are you");
-            pw.println("Hello");
-            pw.flush();
-            pw.close();
-            f.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+    public static void copyFileEasy(File sourceFile, File destFile) throws IOException {
+        if(!destFile.exists()) {
+            destFile.createNewFile();
         }
-        //tv.append("\n\nFile written to "+file);
-    }
-*/
 
-/*
-    private void readRaw(){
-
-        tv.append("\nData read from res/raw/textfile.txt:");
-        InputStream is = this.getResources().openRawResource(R.raw.textfile);
-        InputStreamReader isr = new InputStreamReader(is);
-        BufferedReader br = new BufferedReader(isr, 8192);    // 2nd arg is buffer size
-
-        // More efficient (less readable) implementation of above is the composite expression
-    //BufferedReader br = new BufferedReader(new InputStreamReader(
-    //        this.getResources().openRawResource(R.raw.textfile)), 8192);
+        FileChannel source = null;
+        FileChannel destination = null;
 
         try {
-            String test;
-            while (true){
-                test = br.readLine();
-                // readLine() returns null if no more lines in the file
-                if(test == null) break;
-                tv.append("\n"+"    "+test);
+            source = new FileInputStream(sourceFile).getChannel();
+            destination = new FileOutputStream(destFile).getChannel();
+            destination.transferFrom(source, 0, source.size());
+        }
+        finally {
+            if(source != null) {
+                source.close();
             }
-            isr.close();
-            is.close();
-            br.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            if(destination != null) {
+                destination.close();
+            }
         }
-        tv.append("\n\nThat is all");
     }
-*/
+
+    public static void copyFileAllBytesCopy(File src, File dst, Context appContext) throws IOException {
+        InputStream in = new FileInputStream(src);
+        try {
+            OutputStream out = new FileOutputStream(dst);
+            MediaScannerConnection.scanFile(appContext,
+                    new String[] { dst.toString() }, null,
+                    new MediaScannerConnection.OnScanCompletedListener() {
+                        public void onScanCompleted(String path, Uri uri) {
+                            System.out.println("ExternalStorage Scanned " + path + ":");
+                        }
+                    });
+
+            try {
+                // Transfer bytes from in to out
+                byte[] buf = new byte[1024];
+                int len;
+                while ((len = in.read(buf)) > 0) {
+                    out.write(buf, 0, len);
+                }
+            } finally {
+                out.close();
+            }
+        } finally {
+            in.close();
+        }
+    }
 
 
 }

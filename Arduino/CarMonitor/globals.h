@@ -1,13 +1,19 @@
-const char DEVICE_ID[] = "LF";
-const char displayTitle1[] = "Ambient temp.";
-const char metricUnit1[] = "C";
+const char DEVICE_ID[] = "RF";                // "V"           / "RF"
+const char displayTitle1[] = "Ambient temp."; // "Voltage"     / "Ambient temp."
+const char metricUnit1[] = "C";               // "V"           / "C";
 const char displayTitle2[] = "Tyre temp";
 const char metricUnit2[] = "C";
-const int  proposedSampleFreq = 5000; // ms   //NOTE: Not used at receiving end (android app). For future use.
-const int lowerLimit1 = 40;
-const int upperLimit1 = 80;
+const int lowerLimit1 = 40;                   // 11            / 40;
+const int upperLimit1 = 80;                   // 15            / 80;
 const int lowerLimit2 = 15;
 const int upperLimit2 = 30;
+const int  proposedSampleFreq = 5000; // ms   //NOTE: Not used at receiving end (android app). For future use.
+
+enum SensorType {
+	HeatSensor,
+	VoltageSensor
+};
+SensorType SENSORTYPE = HeatSensor;           // VoltageSensor / HeatSensor;
 
 // UDP comm
 //char AckReply[] = "acknowledged from Ardu"; // a string to send back
@@ -21,7 +27,13 @@ const int UDP_PORT = 1026;
 IPAddress hostIPaddress = (0xFFFFFFFF);
 time_t WATCHDOG_TIMEOUT = 20; // sec
 
-time_t deepSleepPeriod = 3; // sec   NOTE: This is the initial value. It is modified via CMD_GOTO_DEEP_SLEEP 
+const time_t DS_INIT_VALUE = 3;
+time_t deepSleepPeriod = DS_INIT_VALUE; // sec   NOTE: This is the initial value. It is modified via CMD_GOTO_DEEP_SLEEP 
+struct {
+	uint32_t crc32;
+	int deepSleepPeriod;
+} rtcData;
+
 
 // Pins on WeMos D1 Mini
 const int SPI_CS = 16; 
@@ -83,5 +95,6 @@ struct DeviceConfig {
   BoardType boardType = Other;            // OperationMode enumeration: NodeMCU, WeMos, SparkfunThing, Other
   SensorMode sensorMode = None;           // OperationMode enumeration: DemoMode (no sensors, fakes data), Bmp180Mode, Dht11Mode
   unsigned int deepSleepSeconds = 0;      // Number of seconds for the ESP8266 chip to deepsleep for.  GPIO16 needs to be tied to RST to wake from deepSleep http://esp8266.github.io/Arduino/versions/2.0.0/doc/libraries.html
+  SensorType sensorType = SENSORTYPE;
 };
 

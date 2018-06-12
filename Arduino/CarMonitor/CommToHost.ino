@@ -21,19 +21,15 @@ boolean initUDP() {
 			Serial.print(".");
 			delay(453);  // keep trying after a while
 		}
-		// at regular intervals, ask the server until it responds
-//		do {
-			BuildAndSendUDPToHost_AskToJoin();
-			delay(800);
-			if ( ReadCmdFromUDP() > 0) { // we accept both CMD_OK_TO_JOIN_NETWORK, CMD_READ_SENSOR_DATA, and CMD_GOTO_DEEP_SLEEP
-										 // since all commands means that device is registered at host
-				Serial.println("* Connected to host.");
-				udpConnected = true;
-			} 
-//			else {
-//				delay(3000);
-//			}
-//		} while (!udpConnected);
+		BuildAndSendUDPToHost_AskToJoin();
+		delay(800);
+		int cmdID = ReadCmdFromUDP();
+		if ( cmdID > 0) {            // we accept both CMD_OK_TO_JOIN_NETWORK, CMD_READ_SENSOR_DATA, and CMD_GOTO_DEEP_SLEEP
+										// since all commands means that device is registered at host
+			Serial.println("* Connected to host.");
+			udpConnected = true; 
+			ProcessCommand(cmdID);
+		} 
 	}
 	return udpConnected;
 }

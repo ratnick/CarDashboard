@@ -1,4 +1,4 @@
-	JsonObject& buildJson(JsonBuffer& jsonBuffer) {
+JsonObject& buildJson(JsonBuffer& jsonBuffer) {
 		JsonObject& root = jsonBuffer.createObject();
 
 		JsonArray& analogValues = root.createNestedArray("analog");
@@ -28,6 +28,9 @@
 		cmd.metricUnit2 = root["metricUnit2"];
 		if (root.containsKey("secondsToSleep")) {
 			deepSleepPeriod = root["secondsToSleep"];
+			rtcData.deepSleepPeriod = deepSleepPeriod;
+			rtcData.crc32 = calculateCRC32((uint8_t*)&rtcData.deepSleepPeriod, sizeof(rtcData.deepSleepPeriod));
+			ESP.rtcUserMemoryWrite(0, (uint32_t*)&rtcData, sizeof(rtcData));  // store value in deep-sleep persistent memory 
 			Serial.print("\ndeepSleepPeriod=");
 			Serial.println(deepSleepPeriod);
 		}

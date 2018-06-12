@@ -55,7 +55,7 @@ public class comm {
         sendUdpDataJSON(json, ip);
     }
 
-    public static void CreateAndSendCmd_GetSensorReadings(MainActivity.Sensor sensor) {
+    public static void CreateAndSendCmd_GetSensorReadings(Sensor sensor) {
         JSONObject json = new JSONObject();
         try {
             json.put("commandID", CMD_READ_SENSOR_DATA);
@@ -67,7 +67,7 @@ public class comm {
         sendUdpDataJSON(json, sensor.ip);
     }
 
-    public static void CreateAndSendCmd_GotoDeepSleep(MainActivity.Sensor sensor, int secondsToSleep) {
+    public static void CreateAndSendCmd_GotoDeepSleep(Sensor sensor, int secondsToSleep) {
         JSONObject json = new JSONObject();
         try {
             json.put("commandID", CMD_GOTO_DEEP_SLEEP);

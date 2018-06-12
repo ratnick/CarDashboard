@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 android {
     compileSdkVersion 26
-    buildToolsVersion '26.0.2'
+    //buildToolsVersion '26.0.2'
 
     defaultConfig {
         applicationId "com.droid.ws"
@@ -19,6 +19,6 @@ android {
 
 dependencies {
 implementation 'com.android.support.constraint:constraint-layout:1.0.2'
-compile 'com.microsoft.azure:azure-mobile-android:3.4.0'
+//compile 'com.microsoft.azure:azure-mobile-android:3.4.0'
 }
 
