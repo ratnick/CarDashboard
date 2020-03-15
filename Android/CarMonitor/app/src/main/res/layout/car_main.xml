@@ -2,17 +2,34 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    android:id="@+id/constraintLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.droid.ws.MainActivity">
+    tools:context="com.droid.ws.MainActivity"
+    xsi:schemaLocation="http://schemas.android.com/apk/res/android ">
 
     <LinearLayout
+        android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_marginBottom="347dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"></LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent">
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="533dp"
             android:layout_height="0dp"
             android:layout_weight="0.8"
             android:baselineAligned="false"
@@ -228,18 +245,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/timestamp"
-                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
-                        tools:layout_editor_absoluteX="28dp"
-                        tools:layout_editor_absoluteY="706dp" />
+                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium" />
 
                     <TextView
                         android:id="@+id/sensorsDataReceivedTimeTextView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/hh_mm_ss"
-                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
-                        tools:layout_editor_absoluteX="836dp"
-                        tools:layout_editor_absoluteY="642dp" />
+                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large" />
 
                 </TableRow>
 
@@ -261,9 +274,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/outdoor_temp"
-                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large"
-                        tools:layout_editor_absoluteX="993dp"
-                        tools:layout_editor_absoluteY="590dp" />
+                        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Large" />
 
                 </TableRow>
 
@@ -296,9 +307,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/wifiSSIDText"
-                        android:textAppearance="@android:style/TextAppearance.DeviceDefault"
-                        tools:layout_editor_absoluteX="993dp"
-                        tools:layout_editor_absoluteY="590dp" />
+                        android:textAppearance="@android:style/TextAppearance.DeviceDefault" />
 
                 </TableRow>
 

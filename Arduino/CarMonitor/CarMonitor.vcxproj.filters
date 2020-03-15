@@ -17,12 +17,12 @@
   <ItemGroup>
     <None Include="Helpers.ino" />
     <None Include="FlashLED.ino" />
-    <None Include="NTPTimeServices.ino" />
     <None Include="CommToHost.ino" />
     <None Include="DataHandler.ino" />
     <None Include="SensorHandler.ino" />
     <None Include="CarMonitor.ino" />
-    <None Include="..\..\..\Common\Arduino\CommonNNR\WiFi.ino" />
+    <None Include="..\..\..\Common\Arduino\CommonNNR\NTPTimeServices.ino" />
+    <None Include="..\..\..\Common\Arduino\CommonNNR\WiFi_nnr.ino" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.TyreHeatMonitor.vsarduino.h">

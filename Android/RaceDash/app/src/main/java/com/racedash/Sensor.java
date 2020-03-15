@@ -1,4 +1,4 @@
-package com.droid.ws;
+package com.racedash;
 
 import android.widget.TextView;
 
@@ -27,6 +27,7 @@ public class Sensor {
     public TextView textviewItem2;
     public TextView textviewItem3; // cold (input)
     public TextView textviewItem4; // hot  (live output)
+    public TextView textViewDisplayTitle;
     public int lowerLimit1 = 0;
     public int upperLimit1 = 0;
     public int lowerLimit2 = 0;
@@ -37,7 +38,11 @@ public class Sensor {
 
         try {
             if (json.has("deviceID")) {this.deviceID = json.getString("deviceID"); }
-            if (json.has("displayTitle1")) {this.displayTitle1 = json.getString("displayTitle1"); }
+            if (json.has("displayTitle1")) {
+                this.displayTitle1 = json.getString("displayTitle1"); }
+            else {
+                this.displayTitle1 = json.getString("deviceID");
+            }
             if (json.has("metricUnit1")) {this.metricUnit1 = json.getString("metricUnit1"); }
             if (json.has("displayTitle2")) {this.displayTitle2 = json.getString("displayTitle2"); }
             if (json.has("metricUnit2")) {this.metricUnit2 = json.getString("metricUnit2"); }
@@ -54,11 +59,12 @@ public class Sensor {
         }
     }
 
-    public void SetSensorTextview(TextView textViewItem1, TextView textViewItem2, TextView textViewItem3, TextView textViewItem4) {
+    public void SetSensorTextview(TextView textViewItem1, TextView textViewItem2, TextView textViewItem3, TextView textViewItem4, TextView _textViewDisplayTitle) {
         this.textviewItem1 = textViewItem1;
         this.textviewItem2 = textViewItem2;
         this.textviewItem3 = textViewItem3;
         this.textviewItem4 = textViewItem4;
+        this.textViewDisplayTitle = _textViewDisplayTitle;
     }
 
 

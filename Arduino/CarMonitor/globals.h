@@ -1,9 +1,9 @@
-const char DEVICE_ID[] = "RF";                // "V"           / "RF"
+const char DEVICE_ID[] = "XRR";                // "V"           / "RF"
 const char displayTitle1[] = "Ambient temp."; // "Voltage"     / "Ambient temp."
 const char metricUnit1[] = "C";               // "V"           / "C";
 const char displayTitle2[] = "Tyre temp";
 const char metricUnit2[] = "C";
-const int lowerLimit1 = 40;                   // 11            / 40;
+const int lowerLimit1 = 35;                   // 11            / 40;
 const int upperLimit1 = 80;                   // 15            / 80;
 const int lowerLimit2 = 15;
 const int upperLimit2 = 30;
@@ -25,7 +25,7 @@ const int CMD_SENSOR_DATA_REPLY = 4;
 const int CMD_GOTO_DEEP_SLEEP = 5;
 const int UDP_PORT = 1026;
 IPAddress hostIPaddress = (0xFFFFFFFF);
-time_t WATCHDOG_TIMEOUT = 20; // sec
+time_t WATCHDOG_TIMEOUT = 0; //20; // sec
 
 const time_t DS_INIT_VALUE = 3;
 time_t deepSleepPeriod = DS_INIT_VALUE; // sec   NOTE: This is the initial value. It is modified via CMD_GOTO_DEEP_SLEEP 
@@ -91,6 +91,7 @@ struct DeviceConfig {
   int WiFiConnectAttempts = 0;
   int wifiPairs = 1;
   String ssid;
+  String currentSSID;
   String pwd;
   BoardType boardType = Other;            // OperationMode enumeration: NodeMCU, WeMos, SparkfunThing, Other
   SensorMode sensorMode = None;           // OperationMode enumeration: DemoMode (no sensors, fakes data), Bmp180Mode, Dht11Mode

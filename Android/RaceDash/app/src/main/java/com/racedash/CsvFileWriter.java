@@ -1,10 +1,9 @@
-package com.droid.ws;
+package com.racedash;
 
-import android.app.Application;
 import android.content.Context;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Environment;
-import android.media.MediaScannerConnection;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,12 +14,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-import static com.droid.ws.Sensor.MAX_KNOWN_SENSORS;
+import static com.racedash.Sensor.MAX_KNOWN_SENSORS;
 
 public class CsvFileWriter {
 
@@ -49,7 +47,7 @@ public class CsvFileWriter {
         // See http://stackoverflow.com/questions/3551821/android-write-to-sd-card-folder
 
         path = root.getAbsolutePath() + "/" + folderName;
-        finalFolder = new File (path);
+        finalFolder = new File(path);
         finalFolder.mkdirs();
 
         calender = Calendar.getInstance();

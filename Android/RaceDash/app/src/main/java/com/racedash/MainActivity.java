@@ -1,4 +1,4 @@
-package com.droid.ws;
+package com.racedash;
 
 import android.app.Activity;
 import android.content.Context;
@@ -12,12 +12,8 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
-
-//import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,14 +27,18 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import static com.droid.ws.Sensor.GetSensorID;
-import static com.droid.ws.Sensor.MAX_KNOWN_SENSORS;
+import static com.racedash.Sensor.GetSensorID;
+import static com.racedash.Sensor.MAX_KNOWN_SENSORS;
+
+//import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 
 public class MainActivity extends Activity {
 
     //private MobileServiceClient mClient;
 
-    static int MAX_SENSORS = 10;
+
+    static int MAX_FREE_SENSORS = 5;
+    static int MAX_SENSORS = MAX_KNOWN_SENSORS + MAX_FREE_SENSORS;
     Sensor[] sensor = new Sensor[MAX_SENSORS];  // 1-dimensional array of Sensor objects
     public static final int SENSOR_TIMEOUT = 20000; // ms
     //public static final int SENSOR_DEEP_SLEEP_TIMEOUT = 20; // sec
@@ -53,10 +53,10 @@ public class MainActivity extends Activity {
     TextView RFpressureTextView;
     TextView LRpressureTextView;
     TextView RRpressureTextView;
-    TextView LFcoldPressureTextView;
-    TextView RFcoldPressureTextView;
-    TextView LRcoldPressureTextView;
-    TextView RRcoldPressureTextView;
+    TextView LFcoldpressureTextView;
+    TextView RFcoldpressureTextView;
+    TextView LRcoldpressureTextView;
+    TextView RRcoldpressureTextView;
     TextView sensorDataVoltagetextView;
     TextView ambientTemperatureTextView;
     TextView sensorSleepTime;
@@ -64,6 +64,8 @@ public class MainActivity extends Activity {
     TextView tempConvertAlpha;
     TextView tempConvertBeta;
     TextView wifiSSIDTextView;
+    TextView[] labelFreeTextViews = new TextView[MAX_FREE_SENSORS];         //labels
+    TextView[] sensorFreeTextViews = new TextView[MAX_FREE_SENSORS];   //values
 
     ToggleButton raceOnOffButton;
     Button exitButton;
@@ -95,7 +97,7 @@ public class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.car_main);
+        setContentView(R.layout.activity_main);
         // disable auto turn screen off feature
         final Window window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON); // Turn screen on if off
@@ -106,15 +108,25 @@ public class MainActivity extends Activity {
         RFtemperatureTextView = (TextView) findViewById(R.id.RFtemperatureTextView);
         LRtemperatureTextView = (TextView) findViewById(R.id.LRtemperatureTextView);
         RRtemperatureTextView = (TextView) findViewById(R.id.RRtemperatureTextView);
-/*        LFpressureTextView = (TextView) findViewById(R.id.LFpressureTextView);
+        LFpressureTextView = (TextView) findViewById(R.id.LFpressureTextView);
         RFpressureTextView = (TextView) findViewById(R.id.RFpressureTextView );
         LRpressureTextView = (TextView) findViewById(R.id.LRpressureTextView );
         RRpressureTextView = (TextView) findViewById(R.id.RRpressureTextView );
-        LFcoldPressureTextView = (TextView) findViewById(R.id.LFcoldPressureTextView );
-        RFcoldPressureTextView = (TextView) findViewById(R.id.RFcoldPressureTextView );
-        LRcoldPressureTextView = (TextView) findViewById(R.id.LRcoldPressureTextView );
-        RRcoldPressureTextView = (TextView) findViewById(R.id.RRcoldPressureTextView );
-*/
+        LFcoldpressureTextView = (TextView) findViewById(R.id.LFcoldpressureTextView );
+        RFcoldpressureTextView = (TextView) findViewById(R.id.RFcoldpressureTextView );
+        LRcoldpressureTextView = (TextView) findViewById(R.id.LRcoldpressureTextView );
+        RRcoldpressureTextView = (TextView) findViewById(R.id.RRcoldpressureTextView );
+        labelFreeTextViews[0] = (TextView) findViewById(R.id.labelFree0TextView);
+        labelFreeTextViews[1] = (TextView) findViewById(R.id.labelFree1TextView);
+        labelFreeTextViews[2] = (TextView) findViewById(R.id.labelFree2TextView);
+        labelFreeTextViews[3] = (TextView) findViewById(R.id.labelFree3TextView);
+        labelFreeTextViews[4] = (TextView) findViewById(R.id.labelFree4TextView);
+        sensorFreeTextViews[0] = (TextView) findViewById(R.id.sensorFree0textView);
+        sensorFreeTextViews[1] = (TextView) findViewById(R.id.sensorFree1textView);
+        sensorFreeTextViews[2] = (TextView) findViewById(R.id.sensorFree2textView);
+        sensorFreeTextViews[3] = (TextView) findViewById(R.id.sensorFree3textView);
+        sensorFreeTextViews[4] = (TextView) findViewById(R.id.sensorFree4textView);
+
         sensorDataVoltagetextView = (TextView) findViewById(R.id.sensorDataVoltagetextView);
         ambientTemperatureTextView = (TextView) findViewById(R.id.ambientTemperatureTextView);
         raceOnOffButton = (ToggleButton) findViewById(R.id.raceOnOffButton);
@@ -126,7 +138,7 @@ public class MainActivity extends Activity {
         wifiSSIDTextView = (TextView) findViewById(R.id.wifiSSIDTextView);
 
         if (CsvFileWriter.checkSDCard()) {
-            CsvFileWriter.CreateCsvFile(getApplicationContext());
+//            CsvFileWriter.CreateCsvFile(getApplicationContext());
         }
 
         // Write to the cloud
@@ -138,20 +150,14 @@ public class MainActivity extends Activity {
 
         comm.wifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         comm.dhcp = comm.wifi.getDhcpInfo();
-        WifiInfo info = comm.wifi.getConnectionInfo ();
-        final String ssidStr  = info.getSSID();
+        WifiInfo info = comm.wifi.getConnectionInfo();
+        final String ssidStr = info.getSSID();
         UpdateSSID(ssidStr);
 
         // listen and process INCOMING UDP packets
         new Thread(new Runnable() {
             @Override
             public void run() {
-                //comm.wifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-                //comm.dhcp = comm.wifi.getDhcpInfo();
-
-                //old1: WifiManager wifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-                //old1: DhcpInfo dhcp = wifi.getDhcpInfo();
-
                 try {
                     comm.socket = new DatagramSocket(comm.UDP_PORT);
                 } catch (Exception e) {
@@ -240,7 +246,7 @@ public class MainActivity extends Activity {
                     raceOnOffButton.getBackground().setColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY);
                     raceOnOffButton.setTextColor(Color.GREEN);
                 } else {
-                    raceOnOffButton.getBackground().setColorFilter(Color.YELLOW,PorterDuff.Mode.LIGHTEN);
+                    raceOnOffButton.getBackground().setColorFilter(Color.YELLOW, PorterDuff.Mode.LIGHTEN);
                     raceOnOffButton.setTextColor(Color.BLUE);
 
                 }
@@ -260,19 +266,22 @@ public class MainActivity extends Activity {
     void AssignTextViewsToSensor(int sensorID) {
         switch (sensorID) {
             case 0:
-                sensor[sensorID].SetSensorTextview(LFtemperatureTextView, null, LFpressureTextView, LFcoldPressureTextView);
+                sensor[sensorID].SetSensorTextview(LFtemperatureTextView, null, LFpressureTextView, LFcoldpressureTextView, null);
                 break;
             case 1:
-                sensor[sensorID].SetSensorTextview(RFtemperatureTextView, ambientTemperatureTextView, RFpressureTextView, RFcoldPressureTextView);
+                sensor[sensorID].SetSensorTextview(RFtemperatureTextView, ambientTemperatureTextView, RFpressureTextView, RFcoldpressureTextView, null);
                 break;
             case 2:
-                sensor[sensorID].SetSensorTextview(LRtemperatureTextView, null, LRpressureTextView, LRcoldPressureTextView);
+                sensor[sensorID].SetSensorTextview(LRtemperatureTextView, null, LRpressureTextView, LRcoldpressureTextView, null);
                 break;
             case 3:
-                sensor[sensorID].SetSensorTextview(RRtemperatureTextView, null, RRpressureTextView, RRcoldPressureTextView);
+                sensor[sensorID].SetSensorTextview(RRtemperatureTextView, null, RRpressureTextView, RRcoldpressureTextView, null);
                 break;
             case 4:
-                sensor[sensorID].SetSensorTextview(sensorDataVoltagetextView, null, null, null);
+                sensor[sensorID].SetSensorTextview(sensorDataVoltagetextView, null, null, null, null);
+                break;
+            default:  // this is a free sensor, i.e. not pre-defined in the layout
+                sensor[sensorID].SetSensorTextview(sensorFreeTextViews[sensorID - MAX_KNOWN_SENSORS], null, null, null, labelFreeTextViews[sensorID - MAX_KNOWN_SENSORS]);
                 break;
         }
     }
@@ -359,7 +368,7 @@ public class MainActivity extends Activity {
                     innertextviewItem.setText(String.format(Locale.ENGLISH, "%.0f", val_f));
                 }
                 if (val_f < sensor[sensorID].lowerLimit1 ) {
-                    innertextviewItem.setTextColor(Color.BLUE);
+                    innertextviewItem.setTextColor(Color.WHITE);
                 } else if (sensor[sensorID].upperLimit1 < val_f) {
                     innertextviewItem.setTextColor(Color.RED);
                 } else {
@@ -376,7 +385,7 @@ public class MainActivity extends Activity {
                 public void run() {
                     innertextviewItem2.setText(String.valueOf(val2_f).substring(0,4));
                     if (val2_f < sensor[sensorID].lowerLimit2 ) {
-                        innertextviewItem2.setTextColor(Color.BLUE);
+                        innertextviewItem2.setTextColor(Color.WHITE);
                     } else if (sensor[sensorID].upperLimit2 < val2_f) {
                         innertextviewItem2.setTextColor(Color.RED);
                     } else {
@@ -385,6 +394,16 @@ public class MainActivity extends Activity {
                 }
             });
         }
+
+        if (sensor[sensorID].textViewDisplayTitle != null) {
+            final TextView innertextviewItem5 = sensor[sensorID].textViewDisplayTitle;
+            innertextviewItem5.post(new Runnable() {
+                public void run() {
+                    innertextviewItem5.setText(sensor[sensorID].displayTitle1);
+                }
+            });
+        }
+
         sensorsDataReceivedTimeTextView.post(new Runnable() {
             public void run() {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");

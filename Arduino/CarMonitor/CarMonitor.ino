@@ -15,6 +15,9 @@
 #include <TimeLib.h>        // http://playground.arduino.cc/code/time - installed via library manager
 #include "globals.h"        // global structures and enums used by the applocation
 #include <time.h>
+#include <LogLib.h>
+
+#define DEBUGLEVEL 4
 
 // The Arduino device itself
 DeviceConfig wifiDevice;
@@ -62,6 +65,7 @@ void setup() {
 
 	Serial.begin(115200);
 	Serial.println("CarMonitor START");
+	InitDebugLevel(DEBUGLEVEL);
 
 	initFlashLED();
 	LED_Flashes(5, 25);
@@ -153,12 +157,6 @@ void loop() {
 		}
 	}
 }
-
-// If Arduino should be used as access point instead of client
-void loop2() {
-	StartWifiAccesspoint();
-}
-
 
 uint32_t calculateCRC32(const uint8_t *data, size_t length) {
 
