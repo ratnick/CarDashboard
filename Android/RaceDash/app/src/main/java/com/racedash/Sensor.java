@@ -10,7 +10,7 @@ import java.sql.Timestamp;
 
 public class Sensor {
 
-    public static int MAX_KNOWN_SENSORS = 5;
+    public static int MAX_KNOWN_SENSORS = 6;
 
     public int sensorID = -1;       // ID assigned within the app. varies from session to session
     public String deviceID = "";    // ID sent by the device itself. Must be hard-coded in the device itself.

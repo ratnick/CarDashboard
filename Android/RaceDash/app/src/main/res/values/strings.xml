@@ -3,11 +3,11 @@
     <string name="app_name">RATNICK Car Monitor</string>
     <string name="outdoor_temp">Outdoor temp:</string>
     <string name="deg_c"> °C </string>
-    <string name="engine">Engine</string>
+    <string name="engine">Measures</string>
     <string name="hh_mm_ss">hh:mm:ss</string>
-    <string name="ambient">Ambient</string>
+    <string name="ambient">System</string>
     <string name="tyres">Tyres</string>
-    <string name="timestamp">Timestamp:</string>
+    <string name="timestamp">Data timestamp:</string>
     <string name="raceOnOff">Race / Pause</string>
     <string name="raceOn">RACING</string>
     <string name="raceOff">(push to race)</string>
@@ -15,7 +15,7 @@
     <string name="sleepTimeText">Sensor sleep sec</string>
     <string name="sampleTimeInt">1000</string>
     <string name="sampleTimeText">Sample time ms</string>
-    <string name="voltageText">Voltage:</string>
+    <string name="humidityText">Humidity:</string>
     <string name="wifiSSIDText">Wifi SSID:</string>
     <string name="tempConvertAlphaText">Temp conv a</string>
     <string name="tempConvertAlphaFloat">4.0</string>

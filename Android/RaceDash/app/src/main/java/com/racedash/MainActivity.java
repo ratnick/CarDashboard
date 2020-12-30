@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -25,10 +28,13 @@ import java.net.InetAddress;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
+import static android.graphics.Color.parseColor;
 import static com.racedash.Sensor.GetSensorID;
 import static com.racedash.Sensor.MAX_KNOWN_SENSORS;
+import static java.util.Objects.isNull;
 
 //import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 
@@ -57,7 +63,7 @@ public class MainActivity extends Activity {
     TextView RFcoldpressureTextView;
     TextView LRcoldpressureTextView;
     TextView RRcoldpressureTextView;
-    TextView sensorDataVoltagetextView;
+    TextView sensorDataHumiditytextView;
     TextView ambientTemperatureTextView;
     TextView sensorSleepTime;
     TextView sampleTime;
@@ -75,7 +81,7 @@ public class MainActivity extends Activity {
 
     public MainActivity() {
         //knownSensors = new String[]{"LF", "RF", "LR", "RR"};
-        String[] ks = new String[]{"LF", "RF", "LR", "RR", "V"};
+        String[] ks = new String[]{"LF", "RF", "LR", "RR", "V", "DHT"};
         Sensor.InitKnownSensors(ks);
     }
 
@@ -127,7 +133,7 @@ public class MainActivity extends Activity {
         sensorFreeTextViews[3] = (TextView) findViewById(R.id.sensorFree3textView);
         sensorFreeTextViews[4] = (TextView) findViewById(R.id.sensorFree4textView);
 
-        sensorDataVoltagetextView = (TextView) findViewById(R.id.sensorDataVoltagetextView);
+        sensorDataHumiditytextView = (TextView) findViewById(R.id.sensorDataHumiditytextView);
         ambientTemperatureTextView = (TextView) findViewById(R.id.ambientTemperatureTextView);
         raceOnOffButton = (ToggleButton) findViewById(R.id.raceOnOffButton);
         exitButton = (Button) findViewById(R.id.exitButton);
@@ -152,6 +158,7 @@ public class MainActivity extends Activity {
         comm.dhcp = comm.wifi.getDhcpInfo();
         WifiInfo info = comm.wifi.getConnectionInfo();
         final String ssidStr = info.getSSID();
+        // NOTE: If you get <unknown SSID> here, it's because the app does not have Location permission set to "always". You should do that in the phone's app settings.
         UpdateSSID(ssidStr);
 
         // listen and process INCOMING UDP packets
@@ -256,7 +263,7 @@ public class MainActivity extends Activity {
         exitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CsvFileWriter.CloseCsvFile(getApplicationContext());
+//                CsvFileWriter.CloseCsvFile(getApplicationContext());
                 finish();
                 System.exit(0);
             }
@@ -266,19 +273,23 @@ public class MainActivity extends Activity {
     void AssignTextViewsToSensor(int sensorID) {
         switch (sensorID) {
             case 0:
-                sensor[sensorID].SetSensorTextview(LFtemperatureTextView, null, LFpressureTextView, LFcoldpressureTextView, null);
+                //sensor[sensorID].SetSensorTextview(LFtemperatureTextView, null, LFpressureTextView, LFcoldpressureTextView, null);
                 break;
             case 1:
-                sensor[sensorID].SetSensorTextview(RFtemperatureTextView, ambientTemperatureTextView, RFpressureTextView, RFcoldpressureTextView, null);
+                //sensor[sensorID].SetSensorTextview(RFtemperatureTextView, ambientTemperatureTextView, RFpressureTextView, RFcoldpressureTextView, null);
+                sensor[sensorID].SetSensorTextview(RFtemperatureTextView, null, RFpressureTextView, RFcoldpressureTextView, null);
                 break;
             case 2:
-                sensor[sensorID].SetSensorTextview(LRtemperatureTextView, null, LRpressureTextView, LRcoldpressureTextView, null);
+                //sensor[sensorID].SetSensorTextview(LRtemperatureTextView, null, LRpressureTextView, LRcoldpressureTextView, null);
                 break;
             case 3:
-                sensor[sensorID].SetSensorTextview(RRtemperatureTextView, null, RRpressureTextView, RRcoldpressureTextView, null);
+                //sensor[sensorID].SetSensorTextview(RRtemperatureTextView, null, RRpressureTextView, RRcoldpressureTextView, null);
                 break;
             case 4:
-                sensor[sensorID].SetSensorTextview(sensorDataVoltagetextView, null, null, null, null);
+                //sensor[sensorID].SetSensorTextview(sensorDataHumiditytextView, null, null, null, null);
+                break;
+            case 5:
+                sensor[sensorID].SetSensorTextview(ambientTemperatureTextView, sensorDataHumiditytextView, null, null, null);
                 break;
             default:  // this is a free sensor, i.e. not pre-defined in the layout
                 sensor[sensorID].SetSensorTextview(sensorFreeTextViews[sensorID - MAX_KNOWN_SENSORS], null, null, null, labelFreeTextViews[sensorID - MAX_KNOWN_SENSORS]);
@@ -302,13 +313,16 @@ public class MainActivity extends Activity {
             String deviceID = null;
             deviceID = json.getString("deviceID");
             int i = Sensor.GetSensorID(deviceID, sensor);
-            sensor[i].value1 = json.getDouble("value1");
-            sensor[i].value2 = json.getDouble("value2");
-            sensor[i].connected = true;
-            sensor[i].lastSampleTime = new Timestamp(System.currentTimeMillis());
-            UpdateSensorUI_NewValue(i);
-            CsvFileWriter.AppendValueToFile(sensor[i]);
-            SendSampleToAzure(); // TODO HERTIL
+            if (!isNull(sensor[i])) {
+                sensor[i].value1 = json.getDouble("value1");
+                sensor[i].value2 = json.getDouble("value2");
+                sensor[i].connected = true;
+                sensor[i].lastSampleTime = new Timestamp(System.currentTimeMillis());
+                UpdateSensorUI_NewValue(i);
+    //TODO            CsvFileWriter.AppendValueToFile(sensor[i]);
+                SendSampleToAzure(); // TODO HERTIL
+
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -365,12 +379,16 @@ public class MainActivity extends Activity {
                 if (sensor[sensorID].deviceID.equals("V")) {   // TODO: Do this by making a sensor type or something similar transferred from the sensor itself
                     innertextviewItem.setText(String.format(Locale.ENGLISH, "%.1f", val_f));
                 } else {
-                    innertextviewItem.setText(String.format(Locale.ENGLISH, "%.0f", val_f));
+                    if (val_f < 10) {
+                        innertextviewItem.setText(String.format(Locale.ENGLISH, "%.1f", val_f));
+                    } else {
+                        innertextviewItem.setText(String.format(Locale.ENGLISH, "%.0f", val_f));
+                    }
                 }
                 if (val_f < sensor[sensorID].lowerLimit1 ) {
-                    innertextviewItem.setTextColor(Color.WHITE);
+                    innertextviewItem.setTextColor(Color.parseColor("#64b5f6"));
                 } else if (sensor[sensorID].upperLimit1 < val_f) {
-                    innertextviewItem.setTextColor(Color.RED);
+                    innertextviewItem.setTextColor(parseColor("#e57373"));
                 } else {
                     innertextviewItem.setTextColor(Color.GREEN);
                 }
@@ -381,13 +399,14 @@ public class MainActivity extends Activity {
             final TextView innertextviewItem2 = sensor[sensorID].textviewItem2;
             double val2 = sensor[sensorID].value2;
             final double val2_f = val2;
+
             innertextviewItem2.post(new Runnable() {
                 public void run() {
-                    innertextviewItem2.setText(String.valueOf(val2_f).substring(0,4));
+                    innertextviewItem2.setText(String.valueOf(val2_f).substring(0));
                     if (val2_f < sensor[sensorID].lowerLimit2 ) {
                         innertextviewItem2.setTextColor(Color.WHITE);
                     } else if (sensor[sensorID].upperLimit2 < val2_f) {
-                        innertextviewItem2.setTextColor(Color.RED);
+                        innertextviewItem2.setTextColor(parseColor("#e57373"));
                     } else {
                         innertextviewItem2.setTextColor(Color.GREEN);
                     }
