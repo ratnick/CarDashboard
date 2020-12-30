@@ -1,3 +1,4 @@
+#include <DHTesp.h>
 #include <Wire.h>
 #include <Adafruit_MLX90614.h>
 
@@ -5,16 +6,23 @@
 
 Adafruit_MLX90614 mlx = Adafruit_MLX90614();
 
+// DHT
+DHTesp dht;
+
+
 void setupSensor() {
 	Serial.print("\nSensor name = ");
 	Serial.println(sensorData.deviceID);
 
-	switch (wifiDevice.sensorType) {
+	switch (device.sensorType) {
 		case HeatSensor:
 			setupHeatSensor();
 			break;
 		case VoltageSensor:
 			; //do nothing
+			break;
+		case HumAndTempDHTSensor:
+			setupHumAndTempDHTSensor(); //do nothing
 			break;
 	}
 	ReadI2CAddresses();
@@ -25,16 +33,23 @@ void setupHeatSensor()
 	mlx.begin();
 }
 
-void readSensor() {
-	switch (wifiDevice.sensorType) {
-	case HeatSensor:
-		readHeatSensor();
-		break;
-	case VoltageSensor:
-		readVoltageSensor();
-		break;
-	}
+void setupHumAndTempDHTSensor()
+{
+	dht.setup(DIGITAL_IN_PIN, DHTesp::DHT11); // Connect DHT sensor to GPIO DIGITAL_IN_PIN
+}
 
+void readSensor() {
+	switch (device.sensorType) {
+		case HeatSensor:
+			readHeatSensor();
+			break;
+		case VoltageSensor:
+			readVoltageSensor();
+			break;
+		case HumAndTempDHTSensor:
+			readHumAndTempDHTSensor();
+			break;
+	}
 }
 
 void readHeatSensor()
@@ -56,6 +71,22 @@ void readVoltageSensor()
 
 	Serial.print("\readVoltageSensor: Voltage = ");
 	Serial.println(sensorData.voltage);
+}
+
+void readHumAndTempDHTSensor()
+{
+	delay(dht.getMinimumSamplingPeriod());
+
+	float humidity = dht.getHumidity();
+	float temperature = dht.getTemperature();
+
+	Serial.print(dht.getStatusString());
+	Serial.print("\thum=");
+	Serial.print(humidity, 1);
+	Serial.print("\t\t temp=");
+	Serial.print(temperature, 1);
+	sensorData.humidity = humidity;
+	sensorData.temperature = temperature;
 }
 
 void ReadI2CAddresses() {

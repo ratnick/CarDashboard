@@ -1,30 +1,15 @@
+#include <Time.h>
 #include <ArduinoJson.h>
-#include <WiFiUDP.h>
-#include <WiFiServer.h>
-#include <WiFiClientSecure.h>
-#include <WiFiClient.h>
-#include <ESP8266WiFiType.h>
-#include <ESP8266WiFiSTA.h>
-#include <ESP8266WiFiScan.h>
-#include <ESP8266WiFiMulti.h>
-#include <ESP8266WiFiGeneric.h>
-#include <ESP8266WiFiAP.h>
-#include <ESP8266WiFi.h>
-#include <ESP8266WebServer.h>
-#include <Wire.h>
-#include <TimeLib.h>        // http://playground.arduino.cc/code/time - installed via library manager
-#include "globals.h"        // global structures and enums used by the applocation
-#include <time.h>
+#include <ArduinoOTA.h>
+
 #include <LogLib.h>
+#include <WifiLib.h>
+#include "globals.h"        // global structures and enums used by the applocation
 
 #define DEBUGLEVEL 4
 
 // The Arduino device itself
-DeviceConfig wifiDevice;
-
-// Wifi and network globals
-const char timeServer[] = "0.dk.pool.ntp.org"; // Danish NTP Server 
-WiFiClient wifiClient;
+Device device;
 
 // For UDP
 WiFiUDP UDP;
@@ -35,8 +20,8 @@ SensorData sensorData;
 uint32_t calculateCRC32(const uint8_t *data, size_t length);
 
 void initDeviceConfig() {
-	wifiDevice.boardType = WeMos;            // BoardType enumeration: NodeMCU, WeMos, SparkfunThing, Other (defaults to Other). This determines pin number of the onboard LED for wifi and publish status. Other means no LED status 
-	wifiDevice.deepSleepSeconds = 0;         // if greater than zero with call ESP8266 deep sleep (default is 0 disabled). GPIO16 needs to be tied to RST to wake from deepSleep. Causes a reset, execution restarts from beginning of sketch
+	device.boardType = WeMos;            // BoardType enumeration: NodeMCU, WeMos, SparkfunThing, Other (defaults to Other). This determines pin number of the onboard LED for wifi and publish status. Other means no LED status 
+	device.deepSleepSeconds = 0;         // if greater than zero with call ESP8266 deep sleep (default is 0 disabled). GPIO16 needs to be tied to RST to wake from deepSleep. Causes a reset, execution restarts from beginning of sketch
 
 	// read static data and ensure they are valid theough CRC check
 	ESP.rtcUserMemoryRead(0, (uint32_t*)&rtcData, sizeof(rtcData));  
@@ -58,6 +43,74 @@ void initDeviceConfig() {
 	}
 }
 
+void ConnectToWifi() {
+	int wifiIndex = initWifi(&device.wifi);
+	delay(250);
+	if (wifiIndex == -1 || WiFi.status() != WL_CONNECTED) {
+		LogLine(0, __FUNCTION__, "Could not connect to wifi. ");
+	}
+	else if (wifiIndex == 100 || wifiIndex == 200) {
+		// Connected. Do nothing.
+	}
+	else {   
+		PrintIPAddress();
+	}
+}
+
+void SetupOTA() {
+
+	// Port defaults to 8266
+	// ArduinoOTA.setPort(8266);
+
+	// Hostname defaults to esp8266-[ChipID]
+	// ArduinoOTA.setHostname("myesp8266");
+
+	// No authentication by default
+	// ArduinoOTA.setPassword("admin");
+
+	// Password can be set with it's md5 value as well
+	// MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
+	// ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
+
+	ArduinoOTA.onStart([]() {
+		String type;
+		if (ArduinoOTA.getCommand() == U_FLASH) {
+			type = "sketch";
+		}
+		else { // U_FS
+			type = "filesystem";
+		}
+
+		// NOTE: if updating FS this would be the place to unmount FS using FS.end()
+		Serial.println("Start updating " + type);
+	});
+	ArduinoOTA.onEnd([]() {
+		Serial.println("\nEnd");
+	});
+	ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+		Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+	});
+	ArduinoOTA.onError([](ota_error_t error) {
+		Serial.printf("Error[%u]: ", error);
+		if (error == OTA_AUTH_ERROR) {
+			Serial.println("Auth Failed");
+		}
+		else if (error == OTA_BEGIN_ERROR) {
+			Serial.println("Begin Failed");
+		}
+		else if (error == OTA_CONNECT_ERROR) {
+			Serial.println("Connect Failed");
+		}
+		else if (error == OTA_RECEIVE_ERROR) {
+			Serial.println("Receive Failed");
+		}
+		else if (error == OTA_END_ERROR) {
+			Serial.println("End Failed");
+		}
+	});
+	ArduinoOTA.begin();
+}
+
 void setup() {
 
 	String wifiname;
@@ -72,9 +125,10 @@ void setup() {
 	delay(100);
 	initDeviceConfig();
 	setupSensor();
-	//initWifiAccesspoint();
-	initWifi();
+	ConnectToWifi();
 	PrintIPAddress();
+	SetupOTA();
+
 }
 
 int i = 0;
@@ -101,7 +155,7 @@ void GoToDeepSleep() {
 		watchdogTimestamp = now() + deepSleepPeriod;
 		Serial.print("GoToDeepSleep(): deepSleepPeriod = ");
 		Serial.println(deepSleepPeriod);
-		ESP.deepSleep(deepSleepPeriod * 1000000);
+//		ESP.deepSleep(deepSleepPeriod * 1000000);
 	}	else {
 		Serial.println("Deep sleep request NOT met. Value is zero");
 	}
@@ -133,6 +187,10 @@ void loop() {
 
 	int cmdID;
 
+	ArduinoOTA.handle();
+	// for test
+	ProcessCommand(CMD_READ_SENSOR_DATA);
+
 	if (WiFi.status() == WL_CONNECTED) {
 		if (udpConnected && (now() < watchdogTimestamp) ) {
 			cmdID = ReadCmdFromUDP();
@@ -149,7 +207,7 @@ void loop() {
 		}
 	}
 	else {
-		initWifi();
+		initWifi(&device.wifi);
 		delay(250);
 		if (WiFi.status() != WL_CONNECTED) {
 			Serial.print("\nCould not connect to wifi: ");

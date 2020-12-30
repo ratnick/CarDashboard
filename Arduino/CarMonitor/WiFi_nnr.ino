@@ -5,7 +5,7 @@ typedef struct
 	String ssid;
 	String pwd;
 } hotspot_cred;
-const int MAX_HOTSPOTS = 7;
+const int MAX_HOTSPOTS_DEFINED = 2;
 
 const bool INIT_HOTSPOT = true;  // false: start trying what's already stored in EEPROM from last successful connection
 
@@ -24,7 +24,7 @@ hotspot_cred SSID_pairs[MAX_HOTSPOTS] = {
 
 */
 
-static void initWifiDevice(int wifiSet) {   //wifiset always zero at the moment. But in time, it will be used for retries at different wifi ssid
+static void initinitWifiDevice(int wifiSet) {   //wifiset always zero at the moment. But in time, it will be used for retries at different wifi ssid
 	wifiDevice.currentSSID = SSID_pairs[wifiSet].ssid;
 	wifiDevice.pwd = SSID_pairs[wifiSet].pwd;
 }
@@ -122,7 +122,7 @@ const int WIFI_STRENGTH_LIMIT = -75; //db
 boolean IsWifiStrenghtOK() {
 	int strength = WiFi.RSSI();
 	//Serial.printf("\n Wifi strength = %i\n", strength);
-	LogLinef(3, __FUNCTION__, "Wifi strength = %ddB", strength);
+	LogLinef(4, __FUNCTION__, "Wifi strength = %ddB", strength);
 	return (WiFi.RSSI() > WIFI_STRENGTH_LIMIT);
 }
 
@@ -156,7 +156,7 @@ boolean getCurrentTimeB() {
 		setSyncInterval(60 * 60);
 		ntpRetryCount++;
 	}
-	LogLinef(4, __FUNCTION__, "NTP time fetched in %d tries", ntpRetryCount);
+	LogLinef(5, __FUNCTION__, "NTP time fetched in %d tries", ntpRetryCount);
 	return (ntpRetryCount < max_retries);
 }
 

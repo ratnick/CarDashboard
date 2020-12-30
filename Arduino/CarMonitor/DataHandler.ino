@@ -41,8 +41,21 @@ JsonObject& buildJson(JsonBuffer& jsonBuffer) {
 	{
 		root["commandID"] = CMD_SENSOR_DATA_REPLY;
 		root["deviceID"] = data.deviceID;
-		root["value1"] = data.temperature;
-		root["value2"] = data.ambTemperature;
+		switch (device.sensorType) {
+		case HeatSensor:
+			root["value1"] = data.temperature;
+			root["value2"] = data.ambTemperature;
+			break;
+		case VoltageSensor:
+			root["value1"] = data.temperature;
+			root["value2"] = data.ambTemperature;
+			break;
+		case HumAndTempDHTSensor:
+			root["value1"] = data.temperature;
+			root["value2"] = data.humidity;
+			break;
+		}
+
 	}
 
 	void serializeJson_AskToJoin(JsonObject& root)
