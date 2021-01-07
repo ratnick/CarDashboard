@@ -22,7 +22,7 @@ void setupSensor() {
 			; //do nothing
 			break;
 		case HumAndTempDHTSensor:
-			setupHumAndTempDHTSensor(); //do nothing
+			setupHumAndTempDHTSensor(); 
 			break;
 	}
 	ReadI2CAddresses();

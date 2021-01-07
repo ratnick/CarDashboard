@@ -432,10 +432,16 @@ public class MainActivity extends Activity {
     }
 
     void UpdateSensorUI_Disconnect(int sensorID){
-        final TextView innertextviewItem = sensor[sensorID].textviewItem1;
-        innertextviewItem.post(new Runnable() {
+        final TextView innertextviewItem1 = sensor[sensorID].textviewItem1;
+        final TextView innertextviewItem2 = sensor[sensorID].textviewItem2;
+        innertextviewItem1.post(new Runnable() {
             public void run() {
-                innertextviewItem.setTextColor(Color.GRAY);
+                innertextviewItem1.setTextColor(Color.GRAY);
+            }
+        });
+        innertextviewItem2.post(new Runnable() {
+            public void run() {
+                innertextviewItem2.setTextColor(Color.GRAY);
             }
         });
     }

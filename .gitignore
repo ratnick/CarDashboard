@@ -44,3 +44,6 @@ Arduino/CarMonitor/.old.vcxproj
 Arduino/CarMonitor/.vs/
 docs/CarMonitor documentation.old.docx
 Arduino/CarMonitor/wifipasswords.h
+/Arduino/OTAtest/Debug
+/Arduino/OTAtest/Release
+/Arduino/OTAtest/__vm
