@@ -1,16 +1,11 @@
 package com.racedash;
-
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -21,34 +16,30 @@ import android.widget.ToggleButton;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 import static android.graphics.Color.parseColor;
-import static com.racedash.Sensor.GetSensorID;
 import static com.racedash.Sensor.MAX_KNOWN_SENSORS;
+import static com.racedash.TPMS_scanner.MAX_TPMS_DEVICES;
 import static java.util.Objects.isNull;
 
 //import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 
 public class MainActivity extends Activity {
-
     //private MobileServiceClient mClient;
 
-
+//    public Globals glob;
     static int MAX_FREE_SENSORS = 5;
     static int MAX_SENSORS = MAX_KNOWN_SENSORS + MAX_FREE_SENSORS;
-    Sensor[] sensor = new Sensor[MAX_SENSORS];  // 1-dimensional array of Sensor objects
-    public static final int SENSOR_TIMEOUT = 20000; // ms
+    public Sensor[] sensor = new Sensor[MAX_SENSORS];  // 1-dimensional array of Sensor objects
+    public static final int SENSOR_TIMEOUT = 120000; // ms
+    public static int  BLE_MS_BETWEEN_SAMPLES = 40;
     //public static final int SENSOR_DEEP_SLEEP_TIMEOUT = 20; // sec
     //public static final int SAMPLE_INTERVAL_MS = 500;
+    TPMS_scanner tpmsScanner = null;
 
     TextView sensorsDataReceivedTimeTextView;
     TextView LFtemperatureTextView;
@@ -59,7 +50,7 @@ public class MainActivity extends Activity {
     TextView RFpressureTextView;
     TextView LRpressureTextView;
     TextView RRpressureTextView;
-    TextView LFcoldpressureTextView;
+    TextView LFbattTextView;
     TextView RFcoldpressureTextView;
     TextView LRcoldpressureTextView;
     TextView RRcoldpressureTextView;
@@ -80,7 +71,6 @@ public class MainActivity extends Activity {
     boolean doneEditing = true;
 
     public MainActivity() {
-        //knownSensors = new String[]{"LF", "RF", "LR", "RR"};
         String[] ks = new String[]{"LF", "RF", "LR", "RR", "V", "DHT"};
         Sensor.InitKnownSensors(ks);
     }
@@ -118,11 +108,11 @@ public class MainActivity extends Activity {
         RFpressureTextView = (TextView) findViewById(R.id.RFpressureTextView );
         LRpressureTextView = (TextView) findViewById(R.id.LRpressureTextView );
         RRpressureTextView = (TextView) findViewById(R.id.RRpressureTextView );
-        LFcoldpressureTextView = (TextView) findViewById(R.id.LFcoldpressureTextView );
+        LFbattTextView = (TextView) findViewById(R.id.LFbatt );
         RFcoldpressureTextView = (TextView) findViewById(R.id.RFcoldpressureTextView );
         LRcoldpressureTextView = (TextView) findViewById(R.id.LRcoldpressureTextView );
         RRcoldpressureTextView = (TextView) findViewById(R.id.RRcoldpressureTextView );
-        labelFreeTextViews[0] = (TextView) findViewById(R.id.labelFree0TextView);
+/*        labelFreeTextViews[0] = (TextView) findViewById(R.id.labelFree0TextView);
         labelFreeTextViews[1] = (TextView) findViewById(R.id.labelFree1TextView);
         labelFreeTextViews[2] = (TextView) findViewById(R.id.labelFree2TextView);
         labelFreeTextViews[3] = (TextView) findViewById(R.id.labelFree3TextView);
@@ -132,8 +122,8 @@ public class MainActivity extends Activity {
         sensorFreeTextViews[2] = (TextView) findViewById(R.id.sensorFree2textView);
         sensorFreeTextViews[3] = (TextView) findViewById(R.id.sensorFree3textView);
         sensorFreeTextViews[4] = (TextView) findViewById(R.id.sensorFree4textView);
-
         sensorDataHumiditytextView = (TextView) findViewById(R.id.sensorDataHumiditytextView);
+*/
         ambientTemperatureTextView = (TextView) findViewById(R.id.ambientTemperatureTextView);
         raceOnOffButton = (ToggleButton) findViewById(R.id.raceOnOffButton);
         exitButton = (Button) findViewById(R.id.exitButton);
@@ -161,8 +151,38 @@ public class MainActivity extends Activity {
         // NOTE: If you get <unknown SSID> here, it's because the app does not have Location permission set to "always". You should do that in the phone's app settings.
         UpdateSSID(ssidStr);
 
-        // listen and process INCOMING UDP packets
+        tpmsScanner = new TPMS_scanner(this);
+        for (int i=0; i<MAX_TPMS_DEVICES; i++) {
+            sensor[i] = new Sensor(i);
+            AssignTextViewsToSensor(i);
+        }
+
+        // initiate BLUETOOTH scanning and update Sensor data
         new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int sampletime = BLE_MS_BETWEEN_SAMPLES;
+
+                try {
+                    // Initialize BLuetooth scanner;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                while (true) {
+                    // Scan bluetooth LE devices
+                    tpmsScanner.scanLeDevice();
+                    // process received data in TPMS_scanner.leScanCallback
+                    sampletime = 5500; //Integer.parseInt(sampleTime.getText().toString());
+                    TimedDelay(sampletime);  //TODO: introduce a listener for changes to this value instead of reading every time from the UI.
+
+                    // Update UI with incoming data from BLE device
+                    updateTPMSSensors();
+                }
+            }
+        }).start();
+
+        // listen and process INCOMING UDP packets
+/*        new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -216,9 +236,10 @@ public class MainActivity extends Activity {
                 }
             }
         }).start();
+*/
 
         // Request (i.e. OUTGOING packets) poll for data from all attached sensors in same thread. Reception handled in other thread
-        new Thread(new Runnable() {
+/*        new Thread(new Runnable() {
             @Override
             public void run() {
             int sampletime = 2000;
@@ -231,11 +252,11 @@ public class MainActivity extends Activity {
                             sensor[i].connected = false;
                             UpdateSensorUI_Disconnect(i);
                         }
-                        comm.CreateAndSendCmd_GetSensorReadings(sensor[i]);
+//NNR                        comm.CreateAndSendCmd_GetSensorReadings(sensor[i]);
                         if (!raceOnOffButton.isChecked()) {
                             int sensorsleeptime = Integer.parseInt(sensorSleepTime.getText().toString());
                             //TimedDelay(2000); // wait for sensor to reply to the last data request
-                            comm.CreateAndSendCmd_GotoDeepSleep(sensor[i], sensorsleeptime);
+//NNR                            comm.CreateAndSendCmd_GotoDeepSleep(sensor[i], sensorsleeptime);
                         }
                     }
                 }
@@ -245,7 +266,7 @@ public class MainActivity extends Activity {
             }
             }
         }).start();
-
+*/
         raceOnOffButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -273,17 +294,17 @@ public class MainActivity extends Activity {
     void AssignTextViewsToSensor(int sensorID) {
         switch (sensorID) {
             case 0:
-                //sensor[sensorID].SetSensorTextview(LFtemperatureTextView, null, LFpressureTextView, LFcoldpressureTextView, null);
+                sensor[sensorID].SetSensorTextview(LFtemperatureTextView, LFpressureTextView,LFbattTextView,null, null);
                 break;
             case 1:
                 //sensor[sensorID].SetSensorTextview(RFtemperatureTextView, ambientTemperatureTextView, RFpressureTextView, RFcoldpressureTextView, null);
-                sensor[sensorID].SetSensorTextview(RFtemperatureTextView, null, RFpressureTextView, RFcoldpressureTextView, null);
+                sensor[sensorID].SetSensorTextview(RFtemperatureTextView, RFpressureTextView,null,null, null);
                 break;
             case 2:
-                //sensor[sensorID].SetSensorTextview(LRtemperatureTextView, null, LRpressureTextView, LRcoldpressureTextView, null);
+                sensor[sensorID].SetSensorTextview(LRtemperatureTextView, LRpressureTextView, null,null, null);
                 break;
             case 3:
-                //sensor[sensorID].SetSensorTextview(RRtemperatureTextView, null, RRpressureTextView, RRcoldpressureTextView, null);
+                sensor[sensorID].SetSensorTextview(RRtemperatureTextView, RRpressureTextView, null,null, null);
                 break;
             case 4:
                 //sensor[sensorID].SetSensorTextview(sensorDataHumiditytextView, null, null, null, null);
@@ -320,16 +341,38 @@ public class MainActivity extends Activity {
                 sensor[i].lastSampleTime = new Timestamp(System.currentTimeMillis());
                 UpdateSensorUI_NewValue(i);
     //TODO            CsvFileWriter.AppendValueToFile(sensor[i]);
-                SendSampleToAzure(); // TODO HERTIL
-
+    //TODO            SendSampleToAzure(); // TODO HERTIL
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    void SendSampleToAzure() {  // HERTIL mht Azure upload
-/*        TodoItem item = new TodoItem();
+    // Copy bluetooth device data to UI shadow data
+    void updateTPMSSensors(){
+        for (int i=0; i<MAX_TPMS_DEVICES;i++) {
+            if (!isNull(sensor[i])) {
+                if (sensor[i].lastSampleTime != tpmsScanner.tpmsDevice[i].lastSampleTime) {
+                    sensor[i].lastSampleTime = tpmsScanner.tpmsDevice[i].lastSampleTime;
+                    sensor[i].value1 =  tpmsScanner.tpmsDevice[i].temperature;
+                    sensor[i].value2 = tpmsScanner.tpmsDevice[i].pressureBar;
+                    sensor[i].connected = true;
+                    UpdateSensorUI_NewValue(i);
+                    //TODO            CsvFileWriter.AppendValueToFile(sensor[i]);
+                    //TODO            SendSampleToAzure(); // TODO HERTIL
+                } else {
+                    Timestamp timeout = new Timestamp(System.currentTimeMillis() - SENSOR_TIMEOUT);
+                    if (sensor[i].lastSampleTime.before(timeout)) {
+                        sensor[i].connected = false;
+                        UpdateSensorUI_Disconnect(i);
+                    }
+                }
+            }
+        }
+    }
+
+/*    void SendSampleToAzure() {  // HERTIL mht Azure upload
+        TodoItem item = new TodoItem();
         item.Text = "Awesome item";
         mClient.getTable(TodoItem.class).insert(item, new TableOperationCallback<item>() {
             public void onCompleted(TodoItem entity, Exception exception, ServiceFilterResponse response) {
@@ -341,8 +384,7 @@ public class MainActivity extends Activity {
             }
 
         });
-*/
-    }
+    }*/
 
     double ConvertTemperature(double orgVal) {
         double alpha = Double.parseDouble(tempConvertAlpha.getText().toString());
@@ -358,43 +400,44 @@ public class MainActivity extends Activity {
     }
 
     void UpdateSensorUI_NewValue(final int sensorID){
-        final TextView innertextviewItem = sensor[sensorID].textviewItem1;
-        double val = sensor[sensorID].value1;
 //        double val3 = sensor[sensorID].value3;
 //        double val4 = sensor[sensorID].value4;
 
-        // If this is a temperature sensor, convert the value
-        if (sensor[sensorID].deviceID.equals("LF") ||
-            sensor[sensorID].deviceID.equals("RF") ||
-            sensor[sensorID].deviceID.equals("LR") ||
-            sensor[sensorID].deviceID.equals("RR") ) {
-            val = ConvertTemperature(val);
+        // If this is an Arduino temperature sensor, convert the value
+/*        if (sensor[sensorID].deviceID.equals("LF") ||
+                sensor[sensorID].deviceID.equals("RF") ||
+                sensor[sensorID].deviceID.equals("LR") ||
+                sensor[sensorID].deviceID.equals("RR") ) {
+                val = ConvertTemperature(val);
 //            val4 = ConvertPressure(val, val3);
         }
-
-        final double val_f = val;
-        innertextviewItem.post(new Runnable() {
-            public void run() {
-
-                if (sensor[sensorID].deviceID.equals("V")) {   // TODO: Do this by making a sensor type or something similar transferred from the sensor itself
-                    innertextviewItem.setText(String.format(Locale.ENGLISH, "%.1f", val_f));
-                } else {
-                    if (val_f < 10) {
+*/
+        if (sensor[sensorID].textviewItem1 != null) {
+            final TextView innertextviewItem = sensor[sensorID].textviewItem1;
+            double val = sensor[sensorID].value1;
+            final double val_f = val;
+            innertextviewItem.post(new Runnable() {
+                public void run() {
+                    if (sensor[sensorID].deviceID.equals("V")) {   // TODO: Do this by making a sensor type or something similar transferred from the sensor itself
                         innertextviewItem.setText(String.format(Locale.ENGLISH, "%.1f", val_f));
                     } else {
-                        innertextviewItem.setText(String.format(Locale.ENGLISH, "%.0f", val_f));
+                        if (val_f < 10) {
+                            innertextviewItem.setText(String.format(Locale.ENGLISH, "%.1f", val_f));
+                        } else {
+                            innertextviewItem.setText(String.format(Locale.ENGLISH, "%.0f", val_f));
+                        }
+                    }
+                    // set color dynamically
+                    if (val_f < sensor[sensorID].lowerLimit1) {
+                        innertextviewItem.setTextColor(Color.parseColor("#64b5f6"));
+                    } else if (sensor[sensorID].upperLimit1 < val_f) {
+                        innertextviewItem.setTextColor(parseColor("#e57373"));
+                    } else {
+                        innertextviewItem.setTextColor(Color.GREEN);
                     }
                 }
-                if (val_f < sensor[sensorID].lowerLimit1 ) {
-                    innertextviewItem.setTextColor(Color.parseColor("#64b5f6"));
-                } else if (sensor[sensorID].upperLimit1 < val_f) {
-                    innertextviewItem.setTextColor(parseColor("#e57373"));
-                } else {
-                    innertextviewItem.setTextColor(Color.GREEN);
-                }
-            }
-        });
-
+            });
+        }
         if (sensor[sensorID].textviewItem2 != null) {
             final TextView innertextviewItem2 = sensor[sensorID].textviewItem2;
             double val2 = sensor[sensorID].value2;
@@ -403,6 +446,13 @@ public class MainActivity extends Activity {
             innertextviewItem2.post(new Runnable() {
                 public void run() {
                     innertextviewItem2.setText(String.valueOf(val2_f).substring(0));
+                    if (val2_f < 10) {
+                        innertextviewItem2.setText(String.format(Locale.ENGLISH, "%.2f", val2_f));
+                    } else {
+                        innertextviewItem2.setText(String.format(Locale.ENGLISH, "%.1f", val2_f));
+                    }
+
+                    // set color dynamically
                     if (val2_f < sensor[sensorID].lowerLimit2 ) {
                         innertextviewItem2.setTextColor(Color.WHITE);
                     } else if (sensor[sensorID].upperLimit2 < val2_f) {
@@ -453,4 +503,5 @@ public class MainActivity extends Activity {
             }
         });
     }
+
 }

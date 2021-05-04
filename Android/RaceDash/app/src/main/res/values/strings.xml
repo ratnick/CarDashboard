@@ -3,9 +3,12 @@
     <string name="app_name">RATNICK Car Monitor</string>
     <string name="outdoor_temp">Outdoor temp:</string>
     <string name="deg_c"> °C </string>
+    <string name="bar"> bar </string>
+    <string name="batt"> batt </string>
     <string name="engine">Measures</string>
     <string name="hh_mm_ss">hh:mm:ss</string>
     <string name="ambient">System</string>
+    <string name="rssi"> rssi </string>
     <string name="tyres">Tyres</string>
     <string name="timestamp">Data timestamp:</string>
     <string name="raceOnOff">Race / Pause</string>
@@ -21,4 +24,18 @@
     <string name="tempConvertAlphaFloat">4.0</string>
     <string name="tempConvertBetaText">Temp conv b</string>
     <string name="tempConvertBetaFloat">0.7</string>
+
+    <string name="ble_not_supported">BLE is not supported</string>
+    <string name="label_data">Data:</string>
+    <string name="label_device_address">Device address:</string>
+    <string name="label_state">State:</string>
+    <string name="no_data">No data</string>
+    <string name="connected">Connected</string>
+    <string name="disconnected">Disconnected</string>
+    <string name="title_devices">BLE Device Scan</string>
+    <string name="error_bluetooth_not_supported">Bluetooth not supported.</string>
+    <string name="unknown_device">Unknown device</string>
+    <string name="unknown_characteristic">Unknown characteristic</string>
+    <string name="unknown_service">Unknown service</string>
+
 </resources>

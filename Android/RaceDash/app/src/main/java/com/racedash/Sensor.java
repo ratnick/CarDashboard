@@ -1,5 +1,4 @@
 package com.racedash;
-
 import android.widget.TextView;
 
 import org.json.JSONException;
@@ -59,6 +58,22 @@ public class Sensor {
         }
     }
 
+    public Sensor(int sensorID) {
+        this.metricUnit1 = "C";
+        this.metricUnit2 = "bar";
+        this.lowerLimit1 = 15;
+        this.upperLimit1 = 50;
+        this.lowerLimit2 = 1;
+        this.upperLimit2 = 2;
+        this.proposedSampleFreq = 10000;
+        this.sensorID = sensorID;
+    }
+
+    public void SetSensorValues(double _value1, double _value2) {
+        this.value1 = _value1;
+        this.value2 = _value2;
+    }
+
     public void SetSensorTextview(TextView textViewItem1, TextView textViewItem2, TextView textViewItem3, TextView textViewItem4, TextView _textViewDisplayTitle) {
         this.textviewItem1 = textViewItem1;
         this.textviewItem2 = textViewItem2;
@@ -95,6 +110,7 @@ public class Sensor {
         }
         // if we reach here, we don't know the sensor, and it's therefore and new and unknown sensor
         if (i >= Sensor.MAX_KNOWN_SENSORS) {
+            // TODO Intialize unknown sensor
             unknownSensorCount++;
         }
         return i;
